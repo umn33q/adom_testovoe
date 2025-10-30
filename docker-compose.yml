@@ -74,14 +74,17 @@ services:
       - php-fpm
 
   postgres:
-    image: postgres:16-alpine
+    build:
+      context: ./docker/postgres
     container_name: adom_postgres
     environment:
       POSTGRES_DB: app
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
+      POSTGRES_INITDB_ARGS: "--locale=ru_RU.UTF-8 --encoding=UTF8"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # init scripts not needed when using POSTGRES_DB with desired locale
     ports:
       - "5432:5432"
 
