@@ -32,6 +32,20 @@ class ApiClient {
     })
   }
 
+  async register(credentials: { name: string; email: string; password: string; password_confirmation: string }) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+    
+    const { data } = await this.client.post('/register', credentials, {
+      headers: {
+        'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+      },
+    })
+    return data
+  }
+
   async login(credentials: { email: string; password: string }) {
     // axios автоматически берёт XSRF-TOKEN из cookie и добавляет в заголовок X-XSRF-TOKEN
     // Но убедимся, что токен есть

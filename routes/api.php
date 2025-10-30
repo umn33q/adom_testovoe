@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicAuthController;
 
+Route::post('/register', [PublicAuthController::class, 'register'])->middleware('web');
 Route::post('/login', [PublicAuthController::class, 'login'])->middleware('web');
 
 Route::middleware(['web', 'auth:sanctum'])->group(function () {

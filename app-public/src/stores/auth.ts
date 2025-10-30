@@ -9,6 +9,7 @@ type AuthUser = {
 }
 
 type LoginCredentials = { email: string; password: string }
+type RegisterCredentials = { name: string; email: string; password: string; password_confirmation: string }
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<AuthUser | null>(null)
@@ -58,6 +59,25 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const register = async (credentials: RegisterCredentials) => {
+    isLoading.value = true
+    error.value = null
+    try {
+      await apiClient.getCsrfToken()
+      const resp = await apiClient.register(credentials)
+      if (resp?.success) {
+        setUser(resp.data)
+      } else {
+        throw new Error(resp?.message || 'Ошибка регистрации')
+      }
+    } catch (e: any) {
+      error.value = e?.response?.data?.message || e?.message || 'Ошибка регистрации'
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const login = async (credentials: LoginCredentials) => {
     isLoading.value = true
     error.value = null
@@ -87,7 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
     // getters
     isAuthenticated, isGuest,
     // actions
-    setUser, initializeAuth, fetchCurrentUser, login, logout,
+    setUser, initializeAuth, fetchCurrentUser, register, login, logout,
   }
 })
 
