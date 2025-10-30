@@ -1,11 +1,18 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+const auth = useAuthStore()
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div>
+    <nav v-if="auth.isAuthenticated" class="p-4 border-b flex items-center gap-4">
+      <RouterLink to="/" class="text-blue-600">Главная</RouterLink>
+      <span class="ml-auto" v-if="auth.isAuthenticated">{{ auth.user?.name }}</span>
+      <button v-if="auth.isAuthenticated" @click="auth.logout()" class="text-blue-600">Выйти</button>
+    </nav>
+    <RouterView />
+  </div>
 </template>
 
 <style scoped></style>

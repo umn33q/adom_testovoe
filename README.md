@@ -4,10 +4,14 @@
 docker compose up -d
 ```
 
+! Заходим в разных браузерах !
+
+http://localhost:5174
 Данные для входа:
 admin@example.com
 password
 
+http://localhost:5173
 user@example.com
 password
 
