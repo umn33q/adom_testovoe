@@ -86,7 +86,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       # init scripts not needed when using POSTGRES_DB with desired locale
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   nginx:
     image: nginx:1.27-alpine
