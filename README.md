@@ -9,4 +9,7 @@ docker compose up -d
 ```
 // migrate
 docker compose exec api php artisan migrate
+
+// migrate:fresh + seed
+docker compose exec api php artisan migrate:fresh --seed
 ```
