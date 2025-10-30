@@ -12,7 +12,7 @@ class ApiClient {
     console.debug('[api] baseURL =', apiBaseUrl)
 
     this.client = axios.create({
-      baseURL: apiBaseUrl + '/api',
+      baseURL: apiBaseUrl + '/api/public',
       withCredentials: true,
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
       xsrfCookieName: 'XSRF-TOKEN',
@@ -47,8 +47,6 @@ class ApiClient {
   }
 
   async login(credentials: { email: string; password: string }) {
-    // axios автоматически берёт XSRF-TOKEN из cookie и добавляет в заголовок X-XSRF-TOKEN
-    // Но убедимся, что токен есть
     const xsrfToken = this.getCookieValue('XSRF-TOKEN')
     if (!xsrfToken) {
       throw new Error('CSRF token not found. Please refresh the page.')

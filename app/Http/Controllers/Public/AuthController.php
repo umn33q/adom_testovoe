@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Public;
 
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Public\LoginRequest;
+use App\Http\Requests\Public\RegisterRequest;
 use App\Models\User;
 use App\Enums\UserRole;
 use Illuminate\Http\JsonResponse;
@@ -11,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class PublicAuthController extends Controller
+class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -40,7 +41,9 @@ class PublicAuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $user = User::where('email', $data['email'])->first();
+        $user = User::where('email', $data['email'])
+            ->where('role', UserRole::User)
+            ->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
             return response()->json([
@@ -95,5 +98,4 @@ class PublicAuthController extends Controller
         ]);
     }
 }
-
 
