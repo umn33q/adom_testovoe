@@ -37,22 +37,22 @@ class Task extends Model
     public function getCreatorAttribute(): ?User
     {
         if ($this->relationLoaded('participants')) {
-            return $this->participants->firstWhere('pivot.role', ParticipantRole::CREATOR->value);
+            return $this->participants->firstWhere('pivot.role', ParticipantRole::CREATOR);
         }
         
         return $this->participants()
-            ->wherePivot('role', ParticipantRole::CREATOR->value)
+            ->wherePivot('role', ParticipantRole::CREATOR)
             ->first();
     }
 
     public function getExecutorAttribute(): ?User
     {
         if ($this->relationLoaded('participants')) {
-            return $this->participants->firstWhere('pivot.role', ParticipantRole::EXECUTOR->value);
+            return $this->participants->firstWhere('pivot.role', ParticipantRole::EXECUTOR);
         }
         
         return $this->participants()
-            ->wherePivot('role', ParticipantRole::EXECUTOR->value)
+            ->wherePivot('role', ParticipantRole::EXECUTOR)
             ->first();
     }
 
@@ -60,6 +60,14 @@ class Task extends Model
     {
         return $query->whereHas('participants', function ($q) use ($userId) {
             $q->where('user_id', $userId);
+        });
+    }
+
+    public function scopeForUserAsExecutorOrObserver($query, $userId)
+    {
+        return $query->whereHas('participants', function ($q) use ($userId) {
+            $q->where('user_id', $userId)
+                ->whereIn('task_participants.role', [ParticipantRole::EXECUTOR, ParticipantRole::OBSERVER]);
         });
     }
 

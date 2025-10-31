@@ -87,6 +87,38 @@ class ApiClient {
     const { data } = await this.client.get('/me')
     return data
   }
+
+  // Tasks API
+  async getTasks(params?: { status?: string; page?: number; per_page?: number }) {
+    const { data } = await this.client.get<{ success: boolean; data: any[]; meta: any }>('/tasks', {
+      params,
+    })
+    return data
+  }
+
+  async getTask(id: number) {
+    const { data } = await this.client.get<{ success: boolean; data: any }>(`/tasks/${id}`)
+    return data
+  }
+
+  // Comments API
+  async createComment(taskId: number, commentData: { content: string }) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+
+    const { data } = await this.client.post<{ success: boolean; data: any }>(
+      `/tasks/${taskId}/comments`,
+      commentData,
+      {
+        headers: {
+          'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+        },
+      },
+    )
+    return data
+  }
 }
 
 export const apiClient = new ApiClient()

@@ -22,6 +22,18 @@ const router = createRouter({
       component: () => import('@/views/HelloWorldView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/tasks',
+      name: 'tasks',
+      component: () => import('@/views/tasks/ListView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/tasks/:id',
+      name: 'task-detail',
+      component: () => import('@/views/tasks/DetailView.vue'),
+      meta: { requiresAuth: true },
+    },
     { path: '/', redirect: '/hello' },
   ],
 })

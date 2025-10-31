@@ -44,7 +44,7 @@ onMounted(() => {
     </template>
 
     <template v-else>
-      <p>Вы авторизованы. Попробуйте запросить профиль: <code>/api/me</code></p>
+      Вы авторизованы.
     </template>
   </div>
 </template>

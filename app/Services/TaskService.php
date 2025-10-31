@@ -9,6 +9,25 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TaskService
 {
+    public function getTasksForPublicUser(int $userId, array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        $query = Task::with(['participants'])
+            ->forUserAsExecutorOrObserver($userId);
+
+        if (isset($filters['status']) && $filters['status']) {
+            $query->filterByStatus($filters['status']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    public function getTaskForPublicUser(int $id, int $userId): ?Task
+    {
+        return Task::with(['participants', 'comments.user'])
+            ->forUserAsExecutorOrObserver($userId)
+            ->find($id);
+    }
+
     public function getTasks(array $filters = [], int $perPage = 15, ?int $userId = null): LengthAwarePaginator
     {
         $query = Task::with(['participants']);
@@ -50,7 +69,7 @@ class TaskService
         // Проверяем наличие creator в participants
         $hasCreator = false;
         foreach ($data['participants'] as $participant) {
-            if ($participant['role'] === ParticipantRole::CREATOR->value) {
+            if ($participant['role'] === ParticipantRole::CREATOR) {
                 $hasCreator = true;
             }
             $participantsData[$participant['user_id']] = ['role' => $participant['role']];
@@ -91,14 +110,14 @@ class TaskService
             // Убеждаемся, что есть creator (если не передан, берем текущего)
             $hasCreator = false;
             foreach ($participantsData as $role) {
-                if ($role['role'] === ParticipantRole::CREATOR->value) {
+                if ($role['role'] === ParticipantRole::CREATOR) {
                     $hasCreator = true;
                     break;
                 }
             }
             
             if (!$hasCreator && $task->creator) {
-                $participantsData[$task->creator->id] = ['role' => ParticipantRole::CREATOR->value];
+                $participantsData[$task->creator->id] = ['role' => ParticipantRole::CREATOR];
             }
             
             $task->participants()->sync($participantsData);
@@ -117,9 +136,9 @@ class TaskService
         return $task->delete();
     }
 
-    public function formatTaskForResponse(Task $task): array
+    public function formatTaskForResponse(Task $task, bool $includeComments = false): array
     {
-        return [
+        $result = [
             'id' => $task->id,
             'title' => $task->title,
             'description' => $task->description,
@@ -146,6 +165,25 @@ class TaskService
             'created_at' => $task->created_at->toIso8601String(),
             'updated_at' => $task->updated_at->toIso8601String(),
         ];
+
+        if ($includeComments && $task->relationLoaded('comments')) {
+            $result['comments'] = $task->comments->map(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'content' => $comment->content,
+                    'task_id' => $comment->task_id,
+                    'user' => $comment->user ? [
+                        'id' => $comment->user->id,
+                        'name' => $comment->user->name,
+                        'email' => $comment->user->email,
+                    ] : null,
+                    'created_at' => $comment->created_at->toIso8601String(),
+                    'updated_at' => $comment->updated_at->toIso8601String(),
+                ];
+            })->toArray();
+        }
+
+        return $result;
     }
 }
 

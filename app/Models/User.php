@@ -61,14 +61,14 @@ class User extends Authenticatable
     public function createdTasks()
     {
         return $this->belongsToMany(Task::class, 'task_participants')
-            ->wherePivot('role', ParticipantRole::CREATOR->value)
+            ->wherePivot('role', ParticipantRole::CREATOR)
             ->withTimestamps();
     }
 
     public function executedTasks()
     {
         return $this->belongsToMany(Task::class, 'task_participants')
-            ->wherePivot('role', ParticipantRole::EXECUTOR->value)
+            ->wherePivot('role', ParticipantRole::EXECUTOR)
             ->withTimestamps();
     }
 }
