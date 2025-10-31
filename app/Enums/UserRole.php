@@ -2,10 +2,23 @@
 
 namespace App\Enums;
 
-enum UserRole: int
+enum UserRole: string
 {
-    case User = 0;
-    case Admin = 1;
+    case USER = 'user';
+    case ADMIN = 'admin';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::USER => 'Пользователь',
+            self::ADMIN => 'Администратор',
+        };
+    }
+
+    public static function values(): array
+    {
+        return array_column(self::cases(), 'value');
+    }
 }
 
 

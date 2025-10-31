@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useTask } from '@/composables/useTasks'
 import CommentsList from '@/components/CommentsList.vue'
 import type { TaskStatus } from '@/types/task'
+import { ParticipantRole, ParticipantRoleLabels } from '@/types/task'
 
 const router = useRouter()
 const route = useRoute()
@@ -158,20 +159,14 @@ onMounted(() => {
               <span
                 :class="[
                   'px-2 py-1 text-xs font-medium rounded',
-                  participant.role === 'creator'
+                  participant.role === ParticipantRole.CREATOR
                     ? 'bg-blue-100 text-blue-800'
-                    : participant.role === 'executor'
+                    : participant.role === ParticipantRole.EXECUTOR
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-800',
                 ]"
               >
-                {{
-                  participant.role === 'creator'
-                    ? 'Постановщик'
-                    : participant.role === 'executor'
-                      ? 'Исполнитель'
-                      : 'Наблюдатель'
-                }}
+                {{ ParticipantRoleLabels[participant.role] }}
               </span>
             </div>
           </div>

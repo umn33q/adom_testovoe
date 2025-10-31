@@ -22,7 +22,7 @@ class AuthController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role' => UserRole::User,
+            'role' => UserRole::USER,
         ]);
 
         Auth::login($user);
@@ -42,7 +42,7 @@ class AuthController extends Controller
     {
         $data = $request->validated();
         $user = User::where('email', $data['email'])
-            ->where('role', UserRole::User)
+            ->where('role', UserRole::USER)
             ->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {

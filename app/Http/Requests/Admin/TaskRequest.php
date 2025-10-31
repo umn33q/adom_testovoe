@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\ParticipantRole;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TaskRequest extends FormRequest
@@ -30,7 +31,7 @@ class TaskRequest extends FormRequest
             'due_date' => ['nullable', 'date'],
             'participants' => [$isUpdate ? 'nullable' : 'required', 'array', 'min:1'],
             'participants.*.user_id' => ['required', 'integer', 'exists:users,id'],
-            'participants.*.role' => ['required', 'string', 'in:creator,executor,observer'],
+            'participants.*.role' => ['required', 'string', 'in:' . implode(',', ParticipantRole::values())],
         ];
     }
 
@@ -46,7 +47,7 @@ class TaskRequest extends FormRequest
                 // При создании должен быть хотя бы один creator
                 $hasCreator = false;
                 foreach ($this->input('participants', []) as $participant) {
-                    if (isset($participant['role']) && $participant['role'] === 'creator') {
+                    if (isset($participant['role']) && $participant['role'] === ParticipantRole::CREATOR->value) {
                         $hasCreator = true;
                         break;
                     }

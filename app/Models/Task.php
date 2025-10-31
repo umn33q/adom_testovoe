@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ParticipantRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,22 +37,22 @@ class Task extends Model
     public function getCreatorAttribute(): ?User
     {
         if ($this->relationLoaded('participants')) {
-            return $this->participants->firstWhere('pivot.role', 'creator');
+            return $this->participants->firstWhere('pivot.role', ParticipantRole::CREATOR->value);
         }
         
         return $this->participants()
-            ->wherePivot('role', 'creator')
+            ->wherePivot('role', ParticipantRole::CREATOR->value)
             ->first();
     }
 
     public function getExecutorAttribute(): ?User
     {
         if ($this->relationLoaded('participants')) {
-            return $this->participants->firstWhere('pivot.role', 'executor');
+            return $this->participants->firstWhere('pivot.role', ParticipantRole::EXECUTOR->value);
         }
         
         return $this->participants()
-            ->wherePivot('role', 'executor')
+            ->wherePivot('role', ParticipantRole::EXECUTOR->value)
             ->first();
     }
 

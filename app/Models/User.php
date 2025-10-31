@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ParticipantRole;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -60,14 +61,14 @@ class User extends Authenticatable
     public function createdTasks()
     {
         return $this->belongsToMany(Task::class, 'task_participants')
-            ->wherePivot('role', 'creator')
+            ->wherePivot('role', ParticipantRole::CREATOR->value)
             ->withTimestamps();
     }
 
     public function executedTasks()
     {
         return $this->belongsToMany(Task::class, 'task_participants')
-            ->wherePivot('role', 'executor')
+            ->wherePivot('role', ParticipantRole::EXECUTOR->value)
             ->withTimestamps();
     }
 }

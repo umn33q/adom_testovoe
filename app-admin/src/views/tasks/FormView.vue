@@ -4,7 +4,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { useTask } from '@/composables/useTasks'
 import { useAuthStore } from '@/stores/auth'
 import UserAutocomplete from '@/components/UserAutocomplete.vue'
-import type { TaskStatus, User, ParticipantRole } from '@/types/task'
+import type { TaskStatus, User } from '@/types/task'
+import { ParticipantRole, ParticipantRoleLabels } from '@/types/task'
 import apiClient from '@/api/client'
 
 const router = useRouter()
@@ -89,9 +90,9 @@ const statusOptions: Array<{ value: TaskStatus; label: string }> = [
 ]
 
 const roleOptions: Array<{ value: ParticipantRole; label: string }> = [
-  { value: 'creator', label: 'Постановщик' },
-  { value: 'executor', label: 'Исполнитель' },
-  { value: 'observer', label: 'Наблюдатель' },
+  { value: ParticipantRole.CREATOR, label: ParticipantRoleLabels[ParticipantRole.CREATOR] },
+  { value: ParticipantRole.EXECUTOR, label: ParticipantRoleLabels[ParticipantRole.EXECUTOR] },
+  { value: ParticipantRole.OBSERVER, label: ParticipantRoleLabels[ParticipantRole.OBSERVER] },
 ]
 
 const validationErrors = ref<Record<string, string>>({})
@@ -117,7 +118,7 @@ const validateForm = (): boolean => {
   const validParticipants = formData.value.participants.filter(
     (p): p is { user: User; role: ParticipantRole } => p.user !== null && p.user !== undefined,
   )
-  const hasCreator = validParticipants.some((p) => p.role === 'creator')
+  const hasCreator = validParticipants.some((p) => p.role === ParticipantRole.CREATOR)
   if (!hasCreator) {
     validationErrors.value.participants = 'Должен быть указан хотя бы один участник с ролью "Постановщик"'
   }
@@ -126,7 +127,7 @@ const validateForm = (): boolean => {
 }
 
 const addParticipant = () => {
-  formData.value.participants.push({ user: null as any, role: 'observer' })
+  formData.value.participants.push({ user: null as any, role: ParticipantRole.OBSERVER })
 }
 
 const removeParticipant = (index: number) => {
@@ -187,7 +188,7 @@ onMounted(async () => {
     if (auth.user) {
       formData.value.participants.push({
         user: auth.user,
-        role: 'creator',
+        role: ParticipantRole.CREATOR,
       })
     }
   }

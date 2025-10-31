@@ -1,6 +1,16 @@
 export type TaskStatus = 'published' | 'in-progress' | 'done' | 'canceled'
 
-export type ParticipantRole = 'creator' | 'executor' | 'observer'
+export enum ParticipantRole {
+  CREATOR = 'creator',
+  EXECUTOR = 'executor',
+  OBSERVER = 'observer',
+}
+
+export const ParticipantRoleLabels: Record<ParticipantRole, string> = {
+  [ParticipantRole.CREATOR]: 'Постановщик',
+  [ParticipantRole.EXECUTOR]: 'Исполнитель',
+  [ParticipantRole.OBSERVER]: 'Наблюдатель',
+}
 
 export interface User {
   id: number

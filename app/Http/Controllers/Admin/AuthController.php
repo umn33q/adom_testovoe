@@ -17,7 +17,7 @@ class AuthController extends Controller
     {
         $data = $request->validated();
         $user = User::where('email', $data['email'])
-            ->where('role', UserRole::Admin)
+            ->where('role', UserRole::ADMIN)
             ->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
@@ -51,7 +51,7 @@ class AuthController extends Controller
         }
 
         // Проверяем, что пользователь имеет роль Admin
-        if ($user->role !== UserRole::Admin) {
+        if ($user->role !== UserRole::ADMIN) {
             return response()->json([
                 'success' => false,
                 'message' => 'Доступ запрещён',
