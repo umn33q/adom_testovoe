@@ -16,7 +16,7 @@ const onSubmit = async () => {
   error.value = null
   try {
     await auth.login({ email: form.email, password: form.password })
-    const redirect = (route.query.redirect as string) || '/hello'
+    const redirect = (route.query.redirect as string) || '/tasks'
     router.replace(redirect)
   } catch (e: any) {
     error.value = e?.message || 'Ошибка входа'
@@ -34,11 +34,11 @@ const onSubmit = async () => {
       <form @submit.prevent="onSubmit" class="space-y-4">
         <div>
           <label class="block text-sm mb-1">Email</label>
-          <input v-model="form.email" type="email" class="w-full border rounded px-3 py-2 outline-none focus:ring" required />
+          <input v-model="form.email" type="email" :disabled="submitting" class="w-full border rounded px-3 py-2 outline-none focus:ring disabled:opacity-50 disabled:cursor-not-allowed" required />
         </div>
         <div>
           <label class="block text-sm mb-1">Пароль</label>
-          <input v-model="form.password" type="password" class="w-full border rounded px-3 py-2 outline-none focus:ring" required />
+          <input v-model="form.password" type="password" :disabled="submitting" class="w-full border rounded px-3 py-2 outline-none focus:ring disabled:opacity-50 disabled:cursor-not-allowed" required />
         </div>
 
         <p v-if="error" class="text-sm text-red-600">{{ error }}</p>

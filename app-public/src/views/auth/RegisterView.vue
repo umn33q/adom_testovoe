@@ -20,7 +20,7 @@ const onSubmit = async () => {
       password: form.password,
       password_confirmation: form.password_confirmation,
     })
-    router.replace('/hello')
+    router.replace('/tasks')
   } catch (e: any) {
     error.value = e?.response?.data?.message || e?.message || 'Ошибка регистрации'
   } finally {

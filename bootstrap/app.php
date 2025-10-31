@@ -16,12 +16,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->use([
+        // CORS для web группы (где Broadcasting)
+        $middleware->web(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
-
-        // Sanctum: поддержка session-based SPA auth
-        $middleware->appendToGroup('web', \Laravel\Sanctum\Http\Middleware\AuthenticateSession::class);
+        
+        // Исключаем broadcasting/auth из CSRF проверки
+        $middleware->validateCsrfTokens(except: [
+            'broadcasting/auth',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

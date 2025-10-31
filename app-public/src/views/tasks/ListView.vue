@@ -2,10 +2,12 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTasks } from '@/composables/useTasks'
+import { useNotifications } from '@/composables/useNotifications'
 import type { TaskStatus } from '@/types/task'
 
 const router = useRouter()
 const { tasks, pagination, loading, error, fetchTasks, goToPage } = useTasks()
+const { setTaskUpdateCallback } = useNotifications()
 
 const getStatusLabel = (status: TaskStatus): string => {
   const labels: Record<TaskStatus, string> = {
@@ -36,8 +38,34 @@ const formatDate = (dateString: string | null): string => {
   })
 }
 
+// Обновляем список задач при получении события
+const handleTaskUpdate = (updatedTask: any) => {
+  const index = tasks.value.findIndex((t) => t.id === updatedTask.id)
+  if (index > -1) {
+    const existingTask = tasks.value[index]
+    if (existingTask) {
+      // Обновляем задачу в списке
+      tasks.value[index] = {
+        ...existingTask,
+        ...updatedTask,
+        title: updatedTask.title ?? existingTask.title,
+        description: updatedTask.description ?? existingTask.description,
+        status: updatedTask.status ?? existingTask.status,
+        due_date: updatedTask.due_date ?? existingTask.due_date,
+      }
+    }
+  } else {
+    // Если задачи нет в списке, перезагружаем список
+    fetchTasks()
+  }
+}
+
 onMounted(() => {
   fetchTasks()
+  // Регистрируем callback для обновления списка задач
+  setTaskUpdateCallback(handleTaskUpdate)
+  // Подписка происходит в ToastNotification на уровне приложения
+  // Здесь только регистрируем callback для обновления списка
 })
 </script>
 

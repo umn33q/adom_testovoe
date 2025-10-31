@@ -160,7 +160,7 @@ const handleSubmit = async () => {
       await createTaskLocal(payload)
     }
   } catch (e) {
-    console.error('Ошибка сохранения задачи:', e)
+    // Ошибка обрабатывается в composable
   }
 }
 

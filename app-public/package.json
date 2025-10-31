@@ -16,6 +16,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@laravel/echo-vue": "^2.2.4",
     "axios": "^1.7.7",
     "laravel-echo": "^2.2.4",
     "pinia": "^3.0.3",

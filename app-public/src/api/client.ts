@@ -8,9 +8,6 @@ class ApiClient {
     const fallbackApiUrl = `${window.location.protocol}//${window.location.hostname}:5175`
     const apiBaseUrl = (envApiUrl && envApiUrl.length > 0 ? envApiUrl : fallbackApiUrl)
 
-    // eslint-disable-next-line no-console
-    console.debug('[api] baseURL =', apiBaseUrl)
-
     this.client = axios.create({
       baseURL: apiBaseUrl + '/api/public',
       withCredentials: true,
@@ -110,7 +107,10 @@ class ApiClient {
 
     const { data } = await this.client.post<{ success: boolean; data: any }>(
       `/tasks/${taskId}/comments`,
-      commentData,
+      {
+        ...commentData,
+        task_id: taskId,
+      },
       {
         headers: {
           'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),

@@ -16,8 +16,12 @@ services:
       DB_DATABASE: app
       DB_USERNAME: app
       DB_PASSWORD: app
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
     depends_on:
       - postgres
+      - reverb
   php-fpm:
     build:
       context: ./docker/api
@@ -37,8 +41,12 @@ services:
       DB_DATABASE: app
       DB_USERNAME: app
       DB_PASSWORD: app
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
     depends_on:
       - postgres
+      - reverb
     command: bash -lc "composer install --no-interaction --prefer-dist && php artisan key:generate --force && php artisan migrate --force || true && php-fpm"
 
   app-public:
@@ -88,6 +96,37 @@ services:
     ports:
       - "5433:5432"
 
+  reverb:
+    build:
+      context: ./docker/api-cli
+    container_name: adom_reverb
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    environment:
+      COMPOSER_ALLOW_SUPERUSER: "1"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: app
+      DB_USERNAME: app
+      DB_PASSWORD: app
+      REVERB_APP_ID: ${REVERB_APP_ID:-1}
+      REVERB_APP_KEY: ${REVERB_APP_KEY}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET}
+      REVERB_HOST: ${REVERB_HOST:-localhost}
+      REVERB_PORT: ${REVERB_PORT:-8080}
+      REVERB_SCHEME: ${REVERB_SCHEME:-http}
+      # Принудительно указываем, что мы не на Windows
+      PHP_OS: Linux
+    depends_on:
+      - postgres
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    ports:
+      - "8080:8080"
+
   nginx:
     image: nginx:1.27-alpine
     container_name: adom_nginx
@@ -95,6 +134,7 @@ services:
       - php-fpm
       - app-public
       - app-admin
+      - reverb
     ports:
       - "80:80"
       - "5175:80"

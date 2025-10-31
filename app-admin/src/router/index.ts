@@ -11,12 +11,6 @@ const router = createRouter({
       meta: { guestOnly: true },
     },
     {
-      path: '/',
-      name: 'home',
-      component: () => import('@/views/HomeView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
       path: '/tasks',
       name: 'tasks',
       component: () => import('@/views/tasks/ListView.vue'),
@@ -40,6 +34,7 @@ const router = createRouter({
       component: () => import('@/views/tasks/FormView.vue'),
       meta: { requiresAuth: true },
     },
+    { path: '/', redirect: '/tasks' },
   ],
 })
 
@@ -56,7 +51,7 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta?.guestOnly && auth.isAuthenticated) {
-    return { name: 'home' }
+    return { name: 'tasks' }
   }
 })
 

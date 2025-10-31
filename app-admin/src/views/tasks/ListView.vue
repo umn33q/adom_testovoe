@@ -44,7 +44,7 @@ const handleDelete = async (taskId: number) => {
       await taskComposable.deleteTask()
       await fetchTasks()
     } catch (e) {
-      console.error('Ошибка удаления задачи:', e)
+      // Ошибка обрабатывается в composable
     }
   }
 }

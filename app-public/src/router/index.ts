@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import apiClient from '@/api/client'
 
 const router = createRouter({
   history: createWebHistory((import.meta as any).env.BASE_URL),
@@ -17,12 +18,6 @@ const router = createRouter({
       meta: { guestOnly: true },
     },
     {
-      path: '/hello',
-      name: 'hello',
-      component: () => import('@/views/HelloWorldView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
       path: '/tasks',
       name: 'tasks',
       component: () => import('@/views/tasks/ListView.vue'),
@@ -34,7 +29,13 @@ const router = createRouter({
       component: () => import('@/views/tasks/DetailView.vue'),
       meta: { requiresAuth: true },
     },
-    { path: '/', redirect: '/hello' },
+    {
+      path: '/notifications',
+      name: 'notifications',
+      component: () => import('@/views/NotificationsView.vue'),
+      meta: { requiresAuth: true },
+    },
+    { path: '/', redirect: '/tasks' },
   ],
 })
 
@@ -51,8 +52,12 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta?.guestOnly && auth.isAuthenticated) {
-    return { name: 'hello' }
+    return { name: 'tasks' }
   }
+
+  // CSRF токен уже настроен через Echo плагин в main.ts
+  // Echo автоматически инициализируется при загрузке приложения
+  // Не нужно управлять подключением/отключением здесь
 })
 
 export default router

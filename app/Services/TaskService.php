@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\ParticipantRole;
+use App\Events\TaskCreated;
+use App\Events\TaskUpdated;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -81,7 +83,12 @@ class TaskService
         
         $task->participants()->attach($participantsData);
 
-        return $task->load(['participants']);
+        $task->load(['participants']);
+        
+        // Отправляем событие о создании задачи
+        event(new TaskCreated($task));
+
+        return $task;
     }
 
     public function updateTask(int $id, array $data, ?int $userId = null): ?Task
@@ -123,7 +130,12 @@ class TaskService
             $task->participants()->sync($participantsData);
         }
 
-        return $task->load(['participants']);
+        $task->load(['participants']);
+        
+        // Отправляем событие об обновлении задачи
+        event(new TaskUpdated($task));
+
+        return $task;
     }
 
     public function deleteTask(int $id, ?int $userId = null): bool

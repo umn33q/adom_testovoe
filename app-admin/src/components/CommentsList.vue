@@ -32,7 +32,7 @@ const handleCreateComment = async () => {
     })
     newCommentContent.value = ''
   } catch (e) {
-    console.error('Ошибка создания комментария:', e)
+    // Ошибка обрабатывается в composable
   } finally {
     isCreating.value = false
   }
@@ -57,7 +57,7 @@ const handleUpdateComment = async (commentId: number) => {
     })
     cancelEdit()
   } catch (e) {
-    console.error('Ошибка обновления комментария:', e)
+    // Ошибка обрабатывается в composable
   }
 }
 
@@ -67,7 +67,7 @@ const handleDeleteComment = async (commentId: number) => {
   try {
     await deleteComment(commentId)
   } catch (e) {
-    console.error('Ошибка удаления комментария:', e)
+    // Ошибка обрабатывается в composable
   }
 }
 

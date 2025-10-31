@@ -51,7 +51,7 @@ const handleAddComment = async () => {
     await createComment({ content: newCommentContent.value })
     newCommentContent.value = ''
   } catch (e) {
-    console.error('Ошибка добавления комментария:', e)
+    // Ошибка обрабатывается в composable
   } finally {
     submittingComment.value = false
   }

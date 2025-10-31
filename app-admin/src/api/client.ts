@@ -19,9 +19,6 @@ class ApiClient {
     const fallbackApiUrl = `${window.location.protocol}//${window.location.hostname}:5175`
     const apiBaseUrl = (envApiUrl && envApiUrl.length > 0 ? envApiUrl : fallbackApiUrl)
 
-    // eslint-disable-next-line no-console
-    console.debug('[api] baseURL =', apiBaseUrl)
-
     this.client = axios.create({
       baseURL: apiBaseUrl + '/api/admin',
       withCredentials: true,

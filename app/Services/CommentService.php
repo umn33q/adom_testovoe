@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\CommentCreated;
 use App\Models\Comment;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,7 +30,12 @@ class CommentService
             'user_id' => $userId,
         ]);
 
-        return $comment->load('user');
+        $comment->load('user');
+        
+        // Отправляем событие о создании комментария
+        event(new CommentCreated($comment));
+
+        return $comment;
     }
 
     public function updateComment(int $id, array $data, int $userId): ?Comment
