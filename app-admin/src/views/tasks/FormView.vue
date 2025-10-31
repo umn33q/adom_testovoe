@@ -142,20 +142,33 @@ const handleSubmit = async () => {
         role: p.role,
       }))
 
-    const payload = {
+    const payload: any = {
       title: formData.value.title,
       description: formData.value.description,
       status: formData.value.status,
       due_date: formData.value.due_date || null,
       creator_id: formData.value.creator!.id,
       executor_id: formData.value.executor?.id || null,
-      participants: [
+    }
+
+    // При создании добавляем creator в participants (бэкенд все равно добавит, но для консистентности)
+    // При редактировании НЕ добавляем creator - он уже есть в базе и обрабатывается через creator_id
+    if (isEdit.value) {
+      // При редактировании отправляем только явно добавленных участников (observer)
+      // creator и executor обрабатываются отдельно через creator_id и executor_id
+      if (validParticipants.length > 0) {
+        payload.participants = validParticipants
+      }
+      // Если участников нет, не отправляем поле participants вообще
+    } else {
+      // При создании отправляем всех участников включая creator
+      payload.participants = [
         ...validParticipants,
         {
           user_id: formData.value.creator!.id,
           role: 'creator' as ParticipantRole,
         },
-      ],
+      ]
     }
 
     if (isEdit.value) {
@@ -200,7 +213,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
+  <div class="p-6">
     <h1 class="text-2xl font-semibold mb-6">
       {{ isEdit ? 'Редактирование задачи' : 'Создание задачи' }}
     </h1>

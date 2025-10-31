@@ -2,13 +2,18 @@
 import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTask } from '@/composables/useTasks'
+import CommentsList from '@/components/CommentsList.vue'
 import type { TaskStatus } from '@/types/task'
 
 const router = useRouter()
 const route = useRoute()
 
-const taskId = computed(() => Number(route.params.id))
-const { task, loading, error, fetchTask, deleteTask } = useTask(taskId.value)
+const taskId = computed(() => {
+  const id = route.params.id
+  return id ? Number(id) : 0
+})
+
+const { task, loading, error, fetchTask, deleteTask } = useTask(taskId)
 
 const statusLabels: Record<TaskStatus, string> = {
   published: 'Опубликована',
@@ -51,7 +56,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
+  <div class="p-6">
     <div class="flex items-center justify-between mb-6">
       <button
         @click="router.back()"
@@ -69,7 +74,7 @@ onMounted(() => {
       </button>
       <div class="flex gap-2">
         <router-link
-          :to="{ name: 'task-edit', params: { id: taskId } }"
+          :to="{ name: 'task-edit', params: { id: taskId.value } }"
           class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
         >
           Редактировать
@@ -174,6 +179,9 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <!-- Комментарии -->
+      <CommentsList v-if="taskId.value > 0" :task-id="taskId.value" />
     </div>
   </div>
 </template>

@@ -28,6 +28,22 @@ export interface Task {
   updated_at: string
 }
 
+export interface Comment {
+  id: number
+  content: string
+  task_id: number
+  user: User
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateCommentData {
+  content: string
+  task_id: number
+}
+
+export type UpdateCommentData = Partial<CreateCommentData>
+
 export interface PaginationMeta {
   current_page: number
   last_page: number

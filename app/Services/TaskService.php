@@ -99,11 +99,12 @@ class TaskService
                 $participantsData[$executorId] = ['role' => 'executor'];
             }
             
-            // Добавляем дополнительные участники
+            // Добавляем дополнительные участники (только observer, creator и executor уже добавлены выше)
             foreach ($data['participants'] as $participant) {
-                // Пропускаем, если пользователь уже добавлен как creator или executor
-                if (!isset($participantsData[$participant['user_id']])) {
-                    $participantsData[$participant['user_id']] = ['role' => $participant['role']];
+                $userId = $participant['user_id'];
+                // Пропускаем creator и executor, они уже добавлены
+                if ($userId !== $task->creator_id && $userId !== $executorId) {
+                    $participantsData[$userId] = ['role' => $participant['role']];
                 }
             }
             

@@ -6,6 +6,9 @@ import type {
   UpdateTaskData,
   TaskFilters,
   User,
+  Comment,
+  CreateCommentData,
+  UpdateCommentData,
 } from '@/types/task'
 
 class ApiClient {
@@ -159,6 +162,67 @@ class ApiClient {
   async searchUsers(query: string) {
     const { data } = await this.client.get<{ success: boolean; data: User[] }>(
       `/users/search?q=${encodeURIComponent(query)}`,
+    )
+    return data
+  }
+
+  // Comments API
+  async getComments(taskId: number) {
+    const { data } = await this.client.get<{ success: boolean; data: Comment[] }>(
+      `/tasks/${taskId}/comments`,
+    )
+    return data
+  }
+
+  async createComment(taskId: number, commentData: CreateCommentData) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+
+    const { data } = await this.client.post<{ success: boolean; data: Comment }>(
+      `/tasks/${taskId}/comments`,
+      commentData,
+      {
+        headers: {
+          'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+        },
+      },
+    )
+    return data
+  }
+
+  async updateComment(taskId: number, commentId: number, commentData: UpdateCommentData) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+
+    const { data } = await this.client.put<{ success: boolean; data: Comment }>(
+      `/tasks/${taskId}/comments/${commentId}`,
+      commentData,
+      {
+        headers: {
+          'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+        },
+      },
+    )
+    return data
+  }
+
+  async deleteComment(taskId: number, commentId: number) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+
+    const { data } = await this.client.delete<{ success: boolean; message?: string }>(
+      `/tasks/${taskId}/comments/${commentId}`,
+      {
+        headers: {
+          'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+        },
+      },
     )
     return data
   }
