@@ -17,8 +17,6 @@ return new class extends Migration
             $table->text('description');
             $table->string('status')->default('published'); // published, in-progress, done, canceled
             $table->dateTime('due_date')->nullable();
-            $table->foreignId('creator_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('executor_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

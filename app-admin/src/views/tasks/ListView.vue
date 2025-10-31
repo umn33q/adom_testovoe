@@ -150,7 +150,9 @@ onMounted(() => {
                 {{ getStatusLabel(task.status) }}
               </span>
             </td>
-            <td class="px-4 py-3 text-sm text-gray-700">{{ task.creator.name }}</td>
+            <td class="px-4 py-3 text-sm text-gray-700">
+              {{ task.creator?.name || '-' }}
+            </td>
             <td class="px-4 py-3 text-sm text-gray-700">
               {{ task.executor?.name || '-' }}
             </td>

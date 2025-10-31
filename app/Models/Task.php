@@ -17,8 +17,6 @@ class Task extends Model
         'description',
         'status',
         'due_date',
-        'creator_id',
-        'executor_id',
     ];
 
     protected function casts(): array
@@ -28,21 +26,33 @@ class Task extends Model
         ];
     }
 
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'creator_id');
-    }
-
-    public function executor(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'executor_id');
-    }
-
     public function participants(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'task_participants')
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    public function getCreatorAttribute(): ?User
+    {
+        if ($this->relationLoaded('participants')) {
+            return $this->participants->firstWhere('pivot.role', 'creator');
+        }
+        
+        return $this->participants()
+            ->wherePivot('role', 'creator')
+            ->first();
+    }
+
+    public function getExecutorAttribute(): ?User
+    {
+        if ($this->relationLoaded('participants')) {
+            return $this->participants->firstWhere('pivot.role', 'executor');
+        }
+        
+        return $this->participants()
+            ->wherePivot('role', 'executor')
+            ->first();
     }
 
     public function scopeForUser($query, $userId)

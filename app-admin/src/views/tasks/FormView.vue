@@ -78,9 +78,7 @@ const formData = ref({
   description: '',
   status: 'published' as TaskStatus,
   due_date: '' as string | null,
-  creator: null as User | null,
-  executor: null as User | null,
-  participants: [] as Array<{ user: User; role: ParticipantRole }>,
+  participants: [] as Array<{ user: User | null; role: ParticipantRole }>,
 })
 
 const statusOptions: Array<{ value: TaskStatus; label: string }> = [
@@ -109,14 +107,19 @@ const validateForm = (): boolean => {
     validationErrors.value.description = 'Описание задачи обязательно'
   }
 
-  if (!formData.value.creator) {
-    validationErrors.value.creator = 'Постановщик обязателен'
-  }
-
   // Проверяем, что все участники имеют выбранного пользователя
   const participantsWithoutUser = formData.value.participants.filter((p) => !p.user)
   if (participantsWithoutUser.length > 0) {
     validationErrors.value.participants = 'Не все участники имеют выбранного пользователя'
+  }
+
+  // Проверяем, что есть хотя бы один участник с ролью creator
+  const validParticipants = formData.value.participants.filter(
+    (p): p is { user: User; role: ParticipantRole } => p.user !== null && p.user !== undefined,
+  )
+  const hasCreator = validParticipants.some((p) => p.role === 'creator')
+  if (!hasCreator) {
+    validationErrors.value.participants = 'Должен быть указан хотя бы один участник с ролью "Постановщик"'
   }
 
   return Object.keys(validationErrors.value).length === 0
@@ -142,33 +145,12 @@ const handleSubmit = async () => {
         role: p.role,
       }))
 
-    const payload: any = {
+    const payload = {
       title: formData.value.title,
       description: formData.value.description,
       status: formData.value.status,
       due_date: formData.value.due_date || null,
-      creator_id: formData.value.creator!.id,
-      executor_id: formData.value.executor?.id || null,
-    }
-
-    // При создании добавляем creator в participants (бэкенд все равно добавит, но для консистентности)
-    // При редактировании НЕ добавляем creator - он уже есть в базе и обрабатывается через creator_id
-    if (isEdit.value) {
-      // При редактировании отправляем только явно добавленных участников (observer)
-      // creator и executor обрабатываются отдельно через creator_id и executor_id
-      if (validParticipants.length > 0) {
-        payload.participants = validParticipants
-      }
-      // Если участников нет, не отправляем поле participants вообще
-    } else {
-      // При создании отправляем всех участников включая creator
-      payload.participants = [
-        ...validParticipants,
-        {
-          user_id: formData.value.creator!.id,
-          role: 'creator' as ParticipantRole,
-        },
-      ]
+      participants: validParticipants,
     }
 
     if (isEdit.value) {
@@ -194,19 +176,19 @@ onMounted(async () => {
         description: task.value.description,
         status: task.value.status,
         due_date: task.value.due_date ? (task.value.due_date.split('T')[0] || null) : null,
-        creator: task.value.creator,
-        executor: task.value.executor,
-        participants: task.value.participants
-          .filter((p) => p.role !== 'creator' && p.role !== 'executor')
-          .map((p) => ({
-            user: { id: p.id, name: p.name, email: p.email },
-            role: p.role,
-          })),
+        participants: task.value.participants.map((p) => ({
+          user: { id: p.id, name: p.name, email: p.email },
+          role: p.role,
+        })),
       }
     }
   } else {
+    // При создании добавляем текущего пользователя как creator по умолчанию
     if (auth.user) {
-      formData.value.creator = auth.user
+      formData.value.participants.push({
+        user: auth.user,
+        role: 'creator',
+      })
     }
   }
 })
@@ -285,27 +267,10 @@ onMounted(async () => {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Постановщик <span class="text-red-500">*</span>
-        </label>
-        <UserAutocomplete
-          v-model="formData.creator"
-          :disabled="isEdit"
-          placeholder="Выберите постановщика"
-        />
-        <p v-if="validationErrors.creator" class="mt-1 text-sm text-red-600">
-          {{ validationErrors.creator }}
-        </p>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Исполнитель</label>
-        <UserAutocomplete v-model="formData.executor" placeholder="Выберите исполнителя" />
-      </div>
-
-      <div>
         <div class="flex items-center justify-between mb-2">
-          <label class="block text-sm font-medium text-gray-700">Участники</label>
+          <label class="block text-sm font-medium text-gray-700">
+            Участники <span class="text-red-500">*</span>
+          </label>
           <button
             type="button"
             @click="addParticipant"
@@ -314,6 +279,10 @@ onMounted(async () => {
             + Добавить участника
           </button>
         </div>
+
+        <p class="text-sm text-gray-500 mb-2">
+          Добавьте участников задачи. Обязательно должен быть хотя бы один участник с ролью "Постановщик".
+        </p>
 
         <div v-if="formData.participants.length === 0" class="text-sm text-gray-500 mb-2">
           Участники не добавлены

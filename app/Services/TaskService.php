@@ -10,7 +10,7 @@ class TaskService
 {
     public function getTasks(array $filters = [], int $perPage = 15, ?int $userId = null): LengthAwarePaginator
     {
-        $query = Task::with(['creator', 'executor', 'participants']);
+        $query = Task::with(['participants']);
 
         if ($userId) {
             $query->forUser($userId);
@@ -25,7 +25,7 @@ class TaskService
 
     public function getTask(int $id, ?int $userId = null): ?Task
     {
-        $query = Task::with(['creator', 'executor', 'participants']);
+        $query = Task::with(['participants']);
 
         if ($userId) {
             $query->forUser($userId);
@@ -41,34 +41,27 @@ class TaskService
             'description' => $data['description'],
             'status' => $data['status'],
             'due_date' => $data['due_date'] ?? null,
-            'creator_id' => $data['creator_id'],
-            'executor_id' => $data['executor_id'] ?? null,
         ]);
 
-        // Добавляем участников
+        // Добавляем участников - все должны быть в массиве participants
         $participantsData = [];
         
-        // Всегда добавляем создателя как участника с ролью creator
-        $participantsData[$data['creator_id']] = ['role' => 'creator'];
-        
-        // Добавляем исполнителя как участника с ролью executor, если указан
-        if (isset($data['executor_id']) && $data['executor_id']) {
-            $participantsData[$data['executor_id']] = ['role' => 'executor'];
+        // Проверяем наличие creator в participants
+        $hasCreator = false;
+        foreach ($data['participants'] as $participant) {
+            if ($participant['role'] === 'creator') {
+                $hasCreator = true;
+            }
+            $participantsData[$participant['user_id']] = ['role' => $participant['role']];
         }
         
-        // Добавляем дополнительные участники, если они переданы
-        if (isset($data['participants']) && is_array($data['participants'])) {
-            foreach ($data['participants'] as $participant) {
-                // Пропускаем, если пользователь уже добавлен как creator или executor
-                if (!isset($participantsData[$participant['user_id']])) {
-                    $participantsData[$participant['user_id']] = ['role' => $participant['role']];
-                }
-            }
+        if (!$hasCreator) {
+            throw new \InvalidArgumentException('В participants должен быть указан хотя бы один участник с ролью creator');
         }
         
         $task->participants()->attach($participantsData);
 
-        return $task->load(['creator', 'executor', 'participants']);
+        return $task->load(['participants']);
     }
 
     public function updateTask(int $id, array $data, ?int $userId = null): ?Task
@@ -83,48 +76,34 @@ class TaskService
             'description' => $data['description'] ?? $task->description,
             'status' => $data['status'] ?? $task->status,
             'due_date' => $data['due_date'] ?? $task->due_date,
-            'executor_id' => $data['executor_id'] ?? $task->executor_id,
         ]);
 
         // Обновляем участников, если они переданы
         if (isset($data['participants']) && is_array($data['participants'])) {
             $participantsData = [];
             
-            // Всегда добавляем создателя как участника с ролью creator
-            $participantsData[$task->creator_id] = ['role' => 'creator'];
-            
-            // Добавляем исполнителя как участника с ролью executor, если указан
-            $executorId = $data['executor_id'] ?? $task->executor_id;
-            if ($executorId) {
-                $participantsData[$executorId] = ['role' => 'executor'];
+            // Добавляем всех участников из массива
+            foreach ($data['participants'] as $participant) {
+                $participantsData[$participant['user_id']] = ['role' => $participant['role']];
             }
             
-            // Добавляем дополнительные участники (только observer, creator и executor уже добавлены выше)
-            foreach ($data['participants'] as $participant) {
-                $userId = $participant['user_id'];
-                // Пропускаем creator и executor, они уже добавлены
-                if ($userId !== $task->creator_id && $userId !== $executorId) {
-                    $participantsData[$userId] = ['role' => $participant['role']];
+            // Убеждаемся, что есть creator (если не передан, берем текущего)
+            $hasCreator = false;
+            foreach ($participantsData as $role) {
+                if ($role['role'] === 'creator') {
+                    $hasCreator = true;
+                    break;
                 }
+            }
+            
+            if (!$hasCreator && $task->creator) {
+                $participantsData[$task->creator->id] = ['role' => 'creator'];
             }
             
             $task->participants()->sync($participantsData);
-        } else {
-            // Если участники не переданы, обновляем только executor, если он изменился
-            $executorId = $data['executor_id'] ?? $task->executor_id;
-            if ($executorId && $executorId !== $task->executor_id) {
-                // Удаляем старую роль executor
-                $task->participants()->wherePivot('role', 'executor')->detach();
-                // Добавляем нового исполнителя
-                if (!$task->participants()->where('user_id', $executorId)->exists()) {
-                    $task->participants()->attach($executorId, ['role' => 'executor']);
-                } else {
-                    $task->participants()->updateExistingPivot($executorId, ['role' => 'executor']);
-                }
-            }
         }
 
-        return $task->load(['creator', 'executor', 'participants']);
+        return $task->load(['participants']);
     }
 
     public function deleteTask(int $id, ?int $userId = null): bool
@@ -145,11 +124,11 @@ class TaskService
             'description' => $task->description,
             'status' => $task->status,
             'due_date' => $task->due_date ? $task->due_date->toIso8601String() : null,
-            'creator' => [
+            'creator' => $task->creator ? [
                 'id' => $task->creator->id,
                 'name' => $task->creator->name,
                 'email' => $task->creator->email,
-            ],
+            ] : null,
             'executor' => $task->executor ? [
                 'id' => $task->executor->id,
                 'name' => $task->executor->name,

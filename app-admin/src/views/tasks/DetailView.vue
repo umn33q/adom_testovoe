@@ -74,7 +74,7 @@ onMounted(() => {
       </button>
       <div class="flex gap-2">
         <router-link
-          :to="{ name: 'task-edit', params: { id: taskId.value } }"
+          :to="{ name: 'task-edit', params: { id: taskId } }"
           class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
         >
           Редактировать
@@ -123,8 +123,9 @@ onMounted(() => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 class="text-sm font-medium text-gray-500 mb-1">Постановщик</h3>
-            <p class="text-gray-900">{{ task.creator.name }}</p>
-            <p class="text-sm text-gray-500">{{ task.creator.email }}</p>
+            <p v-if="task.creator" class="text-gray-900">{{ task.creator.name }}</p>
+            <p v-if="task.creator" class="text-sm text-gray-500">{{ task.creator.email }}</p>
+            <p v-else class="text-gray-400">Не назначен</p>
           </div>
 
           <div>
@@ -181,7 +182,7 @@ onMounted(() => {
       </div>
 
       <!-- Комментарии -->
-      <CommentsList v-if="taskId.value > 0" :task-id="taskId.value" />
+      <CommentsList v-if="taskId > 0" :task-id="taskId" />
     </div>
   </div>
 </template>
