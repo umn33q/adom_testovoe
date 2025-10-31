@@ -16,6 +16,30 @@ const router = createRouter({
       component: () => import('@/views/HomeView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/tasks',
+      name: 'tasks',
+      component: () => import('@/views/tasks/ListView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/tasks/create',
+      name: 'task-create',
+      component: () => import('@/views/tasks/FormView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/tasks/:id',
+      name: 'task-detail',
+      component: () => import('@/views/tasks/DetailView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/tasks/:id/edit',
+      name: 'task-edit',
+      component: () => import('@/views/tasks/FormView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

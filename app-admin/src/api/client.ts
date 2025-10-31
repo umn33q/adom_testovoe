@@ -1,4 +1,12 @@
 import axios, { type AxiosInstance } from 'axios'
+import type {
+  Task,
+  PaginatedResponse,
+  CreateTaskData,
+  UpdateTaskData,
+  TaskFilters,
+  User,
+} from '@/types/task'
 
 class ApiClient {
   private client: AxiosInstance
@@ -71,6 +79,87 @@ class ApiClient {
 
   async getCurrentUser() {
     const { data } = await this.client.get('/me')
+    return data
+  }
+
+  // Tasks API
+  async getTasks(filters?: TaskFilters) {
+    const params = new URLSearchParams()
+    if (filters?.status) {
+      params.append('status', filters.status)
+    }
+    if (filters?.page) {
+      params.append('page', filters.page.toString())
+    }
+    const queryString = params.toString()
+    const url = `/tasks${queryString ? `?${queryString}` : ''}`
+    const { data } = await this.client.get<{ success: boolean; data: PaginatedResponse<Task> }>(url)
+    return data
+  }
+
+  async getTask(id: number) {
+    const { data } = await this.client.get<{ success: boolean; data: Task }>(`/tasks/${id}`)
+    return data
+  }
+
+  async createTask(taskData: CreateTaskData) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+
+    const { data } = await this.client.post<{ success: boolean; data: Task }>(
+      '/tasks',
+      taskData,
+      {
+        headers: {
+          'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+        },
+      },
+    )
+    return data
+  }
+
+  async updateTask(id: number, taskData: UpdateTaskData) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+
+    const { data } = await this.client.put<{ success: boolean; data: Task }>(
+      `/tasks/${id}`,
+      taskData,
+      {
+        headers: {
+          'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+        },
+      },
+    )
+    return data
+  }
+
+  async deleteTask(id: number) {
+    const xsrfToken = this.getCookieValue('XSRF-TOKEN')
+    if (!xsrfToken) {
+      throw new Error('CSRF token not found. Please refresh the page.')
+    }
+
+    const { data } = await this.client.delete<{ success: boolean; message?: string }>(
+      `/tasks/${id}`,
+      {
+        headers: {
+          'X-XSRF-TOKEN': decodeURIComponent(xsrfToken),
+        },
+      },
+    )
+    return data
+  }
+
+  // Users API
+  async searchUsers(query: string) {
+    const { data } = await this.client.get<{ success: boolean; data: User[] }>(
+      `/users/search?q=${encodeURIComponent(query)}`,
+    )
     return data
   }
 }

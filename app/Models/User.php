@@ -49,4 +49,21 @@ class User extends Authenticatable
             'role' => UserRole::class,
         ];
     }
+
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'creator_id');
+    }
+
+    public function executedTasks()
+    {
+        return $this->hasMany(Task::class, 'executor_id');
+    }
+
+    public function participatedTasks()
+    {
+        return $this->belongsToMany(Task::class, 'task_participants')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
 }

@@ -7,9 +7,10 @@ const auth = useAuthStore()
 <template>
   <div>
     <nav v-if="auth.isAuthenticated" class="p-4 border-b flex items-center gap-4">
-      <RouterLink to="/" class="text-blue-600">Главная</RouterLink>
+      <RouterLink to="/" class="text-blue-600 hover:text-blue-800">Главная</RouterLink>
+      <RouterLink to="/tasks" class="text-blue-600 hover:text-blue-800">Задачи</RouterLink>
       <span class="ml-auto" v-if="auth.isAuthenticated">{{ auth.user?.name }}</span>
-      <button v-if="auth.isAuthenticated" @click="auth.logout()" class="text-blue-600">Выйти</button>
+      <button v-if="auth.isAuthenticated" @click="auth.logout()" class="text-blue-600 hover:text-blue-800">Выйти</button>
     </nav>
     <RouterView />
   </div>
