@@ -47,7 +47,7 @@ class TaskRequest extends FormRequest
                 // При создании должен быть хотя бы один creator
                 $hasCreator = false;
                 foreach ($this->input('participants', []) as $participant) {
-                    if (isset($participant['role']) && $participant['role'] === ParticipantRole::CREATOR) {
+                    if (isset($participant['role']) && $participant['role'] === ParticipantRole::CREATOR->value) {
                         $hasCreator = true;
                         break;
                     }

@@ -71,7 +71,7 @@ class TaskService
         // Проверяем наличие creator в participants
         $hasCreator = false;
         foreach ($data['participants'] as $participant) {
-            if ($participant['role'] === ParticipantRole::CREATOR) {
+            if ($participant['role'] === ParticipantRole::CREATOR->value) {
                 $hasCreator = true;
             }
             $participantsData[$participant['user_id']] = ['role' => $participant['role']];
@@ -117,14 +117,14 @@ class TaskService
             // Убеждаемся, что есть creator (если не передан, берем текущего)
             $hasCreator = false;
             foreach ($participantsData as $role) {
-                if ($role['role'] === ParticipantRole::CREATOR) {
+                if ($role['role'] === ParticipantRole::CREATOR->value) {
                     $hasCreator = true;
                     break;
                 }
             }
             
             if (!$hasCreator && $task->creator) {
-                $participantsData[$task->creator->id] = ['role' => ParticipantRole::CREATOR];
+                $participantsData[$task->creator->id] = ['role' => ParticipantRole::CREATOR->value];
             }
             
             $task->participants()->sync($participantsData);
