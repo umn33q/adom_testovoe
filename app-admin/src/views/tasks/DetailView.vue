@@ -58,10 +58,7 @@ onMounted(() => {
 <template>
   <div class="p-6">
     <div class="flex items-center justify-between mb-6">
-      <button
-        @click="router.back()"
-        class="flex items-center text-gray-600 hover:text-gray-800"
-      >
+      <button @click="router.back()" class="flex items-center text-gray-600 hover:text-gray-800">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
@@ -182,10 +179,11 @@ onMounted(() => {
       </div>
 
       <!-- Комментарии -->
-      <CommentsList v-if="taskId > 0" :task-id="taskId" />
+      <div class="p-6">
+        <CommentsList v-if="taskId > 0" :task-id="taskId" />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped></style>
-
