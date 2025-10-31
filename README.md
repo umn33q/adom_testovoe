@@ -12,7 +12,7 @@ admin@example.com
 password
 
 http://localhost:5173
-user@example.com
+user1@example.com
 password
 
 # Полезные команды
