@@ -49,12 +49,6 @@ class CommentController extends Controller
     public function store(CommentRequest $request, int $taskId): JsonResponse
     {
         $userId = $request->user()?->id;
-        if (!$userId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Не авторизован',
-            ], 401);
-        }
 
         $data = $request->validated();
         $data['task_id'] = $taskId;
@@ -70,12 +64,6 @@ class CommentController extends Controller
     public function update(CommentRequest $request, int $taskId, int $id): JsonResponse
     {
         $userId = $request->user()?->id;
-        if (!$userId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Не авторизован',
-            ], 401);
-        }
 
         $comment = $this->commentService->updateComment($id, $request->validated(), $userId);
 
@@ -95,12 +83,6 @@ class CommentController extends Controller
     public function destroy(Request $request, int $taskId, int $id): JsonResponse
     {
         $userId = $request->user()?->id;
-        if (!$userId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Не авторизован',
-            ], 401);
-        }
 
         $deleted = $this->commentService->deleteComment($id, $userId);
 

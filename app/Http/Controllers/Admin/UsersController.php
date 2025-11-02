@@ -20,7 +20,8 @@ class UsersController extends Controller
             ]);
         }
 
-        $users = User::where('name', 'like', "%{$query}%")
+        $users = User::select(['id', 'name', 'email'])
+            ->where('name', 'like', "%{$query}%")
             ->orWhere('email', 'like', "%{$query}%")
             ->limit(20)
             ->get()

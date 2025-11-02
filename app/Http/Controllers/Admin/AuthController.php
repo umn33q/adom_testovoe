@@ -43,12 +43,6 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Не авторизован',
-            ], 401);
-        }
 
         // Проверяем, что пользователь имеет роль Admin
         if ($user->role !== UserRole::ADMIN) {

@@ -16,12 +16,6 @@ class TaskController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Не авторизован',
-            ], 401);
-        }
 
         $filters = [
             'status' => $request->query('status'),
@@ -46,12 +40,6 @@ class TaskController extends Controller
     public function show(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Не авторизован',
-            ], 401);
-        }
 
         $task = $this->taskService->getTaskForPublicUser($id, $user->id);
 
